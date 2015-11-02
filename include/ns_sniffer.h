@@ -29,7 +29,7 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date			: 12:48:52 am
+ *  Date		: 12:48:52 am
  */
 
 #ifndef NS_SNIFFER_H_

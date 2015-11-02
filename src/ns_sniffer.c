@@ -29,11 +29,11 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date			: 12:50:24 am
+ *  Date		: 12:50:24 am
  */
 
 #include <sys/socket.h>			// socket, AF_PACKET, SOCK_RAW, htons
-#include <netinet/if_ether.h>	// ETH_P_ALL
+#include <netinet/if_ether.h>		// ETH_P_ALL
 
 #include "ns_sniffer.h"			// includes standard header
 

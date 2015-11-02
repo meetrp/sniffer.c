@@ -29,7 +29,7 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date			: 1:00:53 am
+ *  Date		: 1:00:53 am
  */
 
 #ifndef NS_ERROR_H_

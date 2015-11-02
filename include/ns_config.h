@@ -29,13 +29,13 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date			: 12:52:52 am
+ *  Date		: 12:52:52 am
  */
 
 #ifndef NS_CONFIG_H_
 #define NS_CONFIG_H_
 
 #define DEFAULT_NETWORK_INTERFACE		"eth0"
-#define DEFAULT_BUF_SIZE					512
+#define DEFAULT_BUF_SIZE			512
 
 #endif /* NS_CONFIG_H_ */

@@ -29,7 +29,7 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date			: 1:03:35 am
+ *  Date		: 1:03:35 am
  */
 
 #ifndef NS_LOG_H_
