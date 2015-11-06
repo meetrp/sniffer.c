@@ -29,12 +29,12 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date		: 1:29:26 am
+ *  Date			: 1:29:26 am
  */
 
 #ifndef NS_PACKET_PROCESSOR_H_
 #define NS_PACKET_PROCESSOR_H_
 
-void process_packet(unsigned char *, int);
+void process_packet(const unsigned char *, const int);
 
 #endif /* NS_PACKET_PROCESSOR_H_ */

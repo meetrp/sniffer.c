@@ -29,10 +29,21 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date		: 1:29:38 am
+ *  Date			: 1:29:38 am
  */
 
-void process_packet(unsigned char *buf, int buf_size)
-{
+#include <stddef.h>
 
+#include "ns_log.h"
+#include "ns_error.h"
+#include "ns_ethernet.h"
+
+void process_packet(const unsigned char *buf, const int buf_size)
+{
+	unsigned char *eth_payload = NULL;
+
+	if (ns_success != parse_ethernet_packet(buf, buf_size, &eth_payload)) {
+		ERR("Error while parsing ethernet packet!");
+		return;
+	}
 }

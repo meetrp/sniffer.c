@@ -29,18 +29,23 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date		: 1:00:53 am
+ *  Date			: 1:00:53 am
  */
 
 #ifndef NS_ERROR_H_
 #define NS_ERROR_H_
 
 typedef enum {
+	/* generic system failures */
 	ns_success,
 	ns_failure,
-	ns_socket_failed,
 	ns_malloc_failed,
-	ns_recvfrom_received_no_data
+
+	/* generic network failures */
+	ns_socket_failed,
+	ns_recvfrom_received_no_data,
+
+	ns_short_packet,
 } ns_error_t;
 
 #endif /* NS_ERROR_H_ */

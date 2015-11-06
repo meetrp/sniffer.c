@@ -29,11 +29,13 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date		: 1:03:35 am
+ *  Date			: 1:03:35 am
  */
 
 #ifndef NS_LOG_H_
 #define NS_LOG_H_
+
+#include <stdio.h>
 
 // TODO: define a proper logger framework into a file
 

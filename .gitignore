@@ -1,0 +1,15 @@
+# compiled files #
+###################
+*.o
+*.lo
+*.so
+*.so*
+*.a
+*.la
+.deps
+.libs
+
+
+# compile/build directories #
+#############################
+build/

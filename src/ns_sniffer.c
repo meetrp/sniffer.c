@@ -29,40 +29,40 @@
  *
  *  Created on		: 03-Nov-2015
  *  Author		: rp
- *  Date		: 12:50:24 am
+ *  Date			: 12:50:24 am
  */
 
-#include <sys/socket.h>			// socket, AF_PACKET, SOCK_RAW, htons
-#include <netinet/if_ether.h>		// ETH_P_ALL
+#include <sys/socket.h>			/* socket, AF_PACKET, SOCK_RAW */
+#include <netinet/if_ether.h>	/* ETH_P_ALL */
+#include <arpa/inet.h>			/* htons */
+#include <unistd.h>			/* close */
 
-#include "ns_sniffer.h"			// includes standard header
+#include "ns_sniffer.h"			/* includes standard header */
 
 #include "ns_packet_processor.h"
 #include "ns_config.h"
 
 ns_error_t sniffer()
 {
-	ns_error_t err = ns_failure;
 	int raw_sock = -1;
 
 	unsigned char *buf;
 	struct sockaddr saddr;
-	int saddr_size;
+	socklen_t saddr_size;
 
 	int data_size;
 
 	raw_sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if (raw_sock < 0) {
 		ERR("Socket Error!");
-		err = ns_socket_failed;
-		goto out;
+		return ns_socket_failed;
 	}
 
 	buf = (unsigned char*) malloc(DEFAULT_BUF_SIZE);
 	if (NULL == buf) {
 		ERR("No mem!");
-		err = ns_malloc_failed;
-		goto no_mem;
+		close(raw_sock);
+		return ns_malloc_failed;
 	}
 
 	while (1) {
@@ -70,16 +70,13 @@ ns_error_t sniffer()
 		if ((data_size = recvfrom(raw_sock, buf, DEFAULT_BUF_SIZE, 0,
 		        &saddr, &saddr_size)) < 0) {
 			ERR("No data!");
-			err = ns_recvfrom_received_no_data;
-			goto no_data;
+			free(buf);
+			close(raw_sock);
+			return ns_recvfrom_received_no_data;
 		}
 
 		process_packet(buf, data_size);
 	}
 
-	err = ns_success;
-
-	no_data: free(buf);
-	no_mem: close(raw_sock);
-	out: return err;
+	return ns_success;
 }
