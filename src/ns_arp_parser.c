@@ -34,7 +34,6 @@
 
 #include <string.h>
 #include <netinet/in.h>
-//#include <sys/socket.h>
 #include <arpa/inet.h>
 
 #include "ns_log.h"
@@ -122,19 +121,14 @@ ns_error_t spoof_arp_response_if_blacklisted(const unsigned char* local_mac,
 	ns_arp_IPv4_eth_payload_t arp_IPv4_human_readable;
 	ns_arp_IPv4_eth_packet_t* arp_IPv4 = (ns_arp_IPv4_eth_packet_t *) buf;
 	ns_error_t response = ns_success;
-	struct in_addr in_addr;
 
 	if (ntohs(arp_IPv4->ns_arp_hdr.ns_arp_opcode) != NS_ARP_REQUEST) {
 		return ns_not_ipv4_arp_request_packet;
 	}
 
-	get_ip_addr_from_name(DEFAULT_NETWORK_INTERFACE, &in_addr);
-	DBG("%s", inet_ntoa(in_addr));
-
 	convert_arp_payload_to_human_readable(arp_IPv4,
 	        &arp_IPv4_human_readable);
 
-	DBG("is found?");
 	response = is_found((const unsigned char**) blacklist,
 	        arp_IPv4_human_readable.ns_arp_target_hw_addr);
 	if (ns_success != response) {

@@ -73,6 +73,8 @@ typedef struct _ns_arp_packet_hdr {
 #define NS_IPv4_ADDR_LEN					4
 #define NS_ARP_TYPE_STR_LEN					8
 
+#define NS_ARP_REPLY_BUF_LEN				42
+
 /* IPv4 over Ethernet ARP payload */
 typedef struct _ns_arp_IPv4_eth_payload {
 		char ns_arp_sender_hw_addr[NS_ETH_IPv4_PRINTABLE_MAC_SIZE];

@@ -128,7 +128,6 @@ ns_error_t prepare_arp_spoof_response_buf_if_blacklisted(
 		return ns_not_ethernet_arp_packet;
 	}
 
-	/* TODO: swap the sender with target MAC in the Ethernet Frame */
 	response = spoof_arp_response_if_blacklisted(local_mac,
 	        (unsigned char *) (buf + NS_ETH_HDR_LEN));
 	if ((response != ns_success)

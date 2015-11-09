@@ -48,6 +48,7 @@ typedef enum {
 	ns_ioctl_failed,
 	ns_interface_error,
 	ns_sendto_failed,
+	ns_bind_failed,
 
 	/* ethernet */
 	ns_eth_empty_packet,

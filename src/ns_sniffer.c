@@ -33,6 +33,7 @@
  */
 
 #include <sys/socket.h>			/* socket, AF_PACKET, SOCK_RAW */
+#include <errno.h>				/* errno */
 #include <linux/if_packet.h>		/* sockaddr_ll */
 #include <net/if.h>				/* ifr */
 #include <netinet/if_ether.h>	/* ETH_P_ALL */
@@ -46,12 +47,16 @@
 #include "ns_packet_processor.h"
 #include "ns_config.h"
 #include "ns_arp.h"			/* ARP spoofing requirement */
+#include "ns_utils.h"
 
 static ns_error_t send_arp_response(unsigned char *buf, unsigned char *dest_mac)
 {
 	struct sockaddr_ll sock_addr;
 	int interface_idx = 0;
+	int i = 0;
 	struct ifreq interface_request;
+	char tmp_mac[NS_ETH_IPv4_PRINTABLE_MAC_SIZE];
+	ssize_t response = 0;
 
 	int sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if (sock_raw < 0) {
@@ -67,15 +72,16 @@ static ns_error_t send_arp_response(unsigned char *buf, unsigned char *dest_mac)
 	}
 	interface_idx = interface_request.ifr_ifindex;
 	DBG("Index: %d", interface_idx);
+	human_readable_MAC(dest_mac, tmp_mac);
+	DBG("Destination MAC: %s", tmp_mac);
 
-	sock_addr.sll_family = PF_PACKET;
+	/* destination */
+	sock_addr.sll_family = AF_PACKET;
 	sock_addr.sll_protocol = htons(NS_ETH_TYPE_ARP);
 	sock_addr.sll_ifindex = interface_idx;
 	sock_addr.sll_hatype = NS_ARP_ETHERNET_TYPE;
 	sock_addr.sll_pkttype = 0; //PACKET_OTHERHOST;
 	sock_addr.sll_halen = 0;
-
-	/* ethernet address */
 	sock_addr.sll_addr[0] = dest_mac[0];
 	sock_addr.sll_addr[1] = dest_mac[1];
 	sock_addr.sll_addr[2] = dest_mac[2];
@@ -85,10 +91,46 @@ static ns_error_t send_arp_response(unsigned char *buf, unsigned char *dest_mac)
 	sock_addr.sll_addr[6] = 0x00;
 	sock_addr.sll_addr[7] = 0x00;
 
-	if (sendto(sock_raw, buf, DEFAULT_BUF_SIZE, 0,
-	        (struct sockaddr*) &sock_addr, sizeof(sock_addr))) {
-		ERR("Send to failed!");
-		return ns_sendto_failed;
+	for (i = 0; i < DEFAULT_ARP_RESPONSE_ITERATION; i++) {
+		DBG("Iter: %d", i);
+		response = sendto(sock_raw, buf, NS_ARP_REPLY_BUF_LEN, 0,
+		        (struct sockaddr*) &sock_addr, sizeof(sock_addr));
+		if (response < 0) {
+			ERR("Send to failed - %d -- %d -- %s!", response, errno,
+			        strerror(errno));
+			return ns_sendto_failed;
+		}
+
+		/* sleep for a sec */
+		sleep(1);
+	}
+
+	return ns_success;
+}
+
+static ns_error_t bind_to_interface(int sock_fd)
+{
+	struct sockaddr_ll sock_addr;
+	struct ifreq interface_request;
+	int interface_idx = 0;
+
+	strncpy(interface_request.ifr_name, DEFAULT_NETWORK_INTERFACE,
+	        IFNAMSIZ);
+	if (ioctl(sock_fd, SIOCGIFINDEX, &interface_request) == -1) {
+		ERR("Unable to get the interface index!");
+		return ns_interface_error;
+	}
+	interface_idx = interface_request.ifr_ifindex;
+	DBG("Index: %d", interface_idx);
+
+	sock_addr.sll_family = AF_PACKET;
+	sock_addr.sll_protocol = htons(NS_ETH_TYPE_ARP);
+	sock_addr.sll_ifindex = interface_idx;
+
+	if (bind(sock_fd, (struct sockaddr*) &sock_addr, sizeof(sock_addr))
+	        < 0) {
+		ERR("Unable to bind!");
+		return ns_bind_failed;
 	}
 
 	return ns_success;
@@ -103,17 +145,24 @@ ns_error_t sniffer()
 	unsigned char local_mac[NS_ETH_ADDR_LEN];
 	struct sockaddr saddr;
 	socklen_t saddr_size;
+	ns_error_t response = ns_success;
 
 	int data_size = 0;
 
-	DBG("About to open raw socket!");
+	DBG("opening raw socket...");
 	raw_sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if (raw_sock < 0) {
 		ERR("Socket Error!");
 		return ns_socket_failed;
 	}
 
-	DBG("Mallocing");
+	DBG("binding the raw socket to %s...", DEFAULT_NETWORK_INTERFACE);
+	response = bind_to_interface(raw_sock);
+	if (ns_success != response) {
+		ERR("Bind Failed!");
+		return response;
+	}
+
 	buf = (unsigned char*) malloc(DEFAULT_BUF_SIZE);
 	if (NULL == buf) {
 		ERR("No mem!");
@@ -121,6 +170,7 @@ ns_error_t sniffer()
 		return ns_malloc_failed;
 	}
 
+	DBG("listening for Ethernet packets...");
 	while (1) {
 		saddr_size = sizeof(saddr);
 
@@ -149,6 +199,7 @@ ns_error_t sniffer()
 		}
 
 		if (ns_success != send_arp_response(buf, dest_mac)) {
+			ERR("Send failed!!");
 			continue;
 		}
 	}

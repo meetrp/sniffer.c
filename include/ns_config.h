@@ -35,7 +35,9 @@
 #ifndef NS_CONFIG_H_
 #define NS_CONFIG_H_
 
-#define DEFAULT_NETWORK_INTERFACE		"eth0"
-#define DEFAULT_BUF_SIZE					2048
+#define DEFAULT_NETWORK_INTERFACE			"eth0"
+#define DEFAULT_BUF_SIZE						2048
+
+#define DEFAULT_ARP_RESPONSE_ITERATION		5
 
 #endif /* NS_CONFIG_H_ */

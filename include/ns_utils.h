@@ -51,8 +51,7 @@ void human_readable_MAC(const unsigned char*, char*);
 void human_readable_IPv4(const unsigned char*, char*);
 
 ns_error_t get_ip_addr_from_name(const char*, struct in_addr*);
-ns_error_t get_MAC_from_device_name(const char* device_name,
-        unsigned char *mac);
+ns_error_t get_MAC_from_device_name(const char*, unsigned char*);
 
 ns_error_t is_found(const unsigned char **, char *);
 
