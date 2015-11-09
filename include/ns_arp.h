@@ -25,23 +25,25 @@
  */
 
 /*
- * ns_ethernet.h
+ * ns_arp.h
  *
- *  Created on		: 05-Nov-2015
+ *  Created on		: 06-Nov-2015
  *  Author		: rp
- *  Date			: 11:00:19 pm
+ *  Date			: 8:46:46 pm
  */
 
-#ifndef NS_ETHERNET_H_
-#define NS_ETHERNET_H_
+#ifndef NS_ARP_H_
+#define NS_ARP_H_
 
 #include <stdint.h>			/* uint16_t and likes */
 #include <stddef.h>		/* NULL */
 
+#include "ns_utils.h"
+#include "ns_ethernet.h"	/* NS_ETH_.* */
 #include "ns_error.h"		/* error states */
 
 /************************************************************
- * ETHERNET FRAME FORMAT
+ * ARP FRAME FORMAT
  *
  * 		6			6			2	    (var)		4		Bytes/Octets
  * 	-----------------------------------------------------------------
@@ -53,54 +55,45 @@
 /*
  * Magic Constants as per the RFC
  */
-#define NS_ETH_ADDR_LEN				6		/* # of octets in MAC addr 	*/
-#define NS_ETH_TYPE_LEN				2		/* # of octets for type 		*/
-#define NS_ETH_MIN_PAYLOAD_LEN		46		/* min octects in a payload 	*/
-#define NS_ETH_MAX_PAYLOAD_LEN		1500	/* max octets in a payload 	*/
+#define NS_ARP_ETHERNET_TYPE		1		/* Ethernet 10/100Mbps */
 
-/*
- * Protocol ID
- */
-#define NS_ETH_TYPE_IPv4				0x0800	/* IPv4 */
-#define NS_ETH_TYPE_ARP				0x0806	/* Address Resolution packet	*/
-#define NS_ETH_TYPE_IPv6				0x86DD	/* IPv6 */
+/* ARP protocol opcodes. */
+#define	NS_ARP_REQUEST				1		/* ARP request. */
+#define	NS_ARP_REPLY				2		/* ARP reply. */
 
-/*
- * Ethernet-II (802.3) header
- */
-#define NS_ETH_HDR_LEN								\
-	(												\
-		NS_ETH_ADDR_LEN +	/* Dest MAC */			\
-		NS_ETH_ADDR_LEN +	/* Src MAC */				\
-		NS_ETH_TYPE_LEN	/* Ether Type */			\
-	)
+typedef struct _ns_arp_packet_hdr {
+		uint16_t ns_arp_hw_type;
+		uint16_t ns_arp_proto_type;
+		uint8_t ns_arp_hw_addr_len;
+		uint8_t ns_arp_proto_addr_len;
+		uint16_t ns_arp_opcode;
+} ns_arp_packet_hdr_t;
 
-typedef struct _ns_ethernet_frame_hdr {
-		unsigned char ns_eth_dest[NS_ETH_ADDR_LEN];
-		unsigned char ns_eth_src[NS_ETH_ADDR_LEN];
-		uint16_t ns_eth_type;
-} ns_ethernet_frame_hdr_t;
+/* ToDo: Move to IPv4 based file */
+#define NS_IPv4_ADDR_LEN					4
+#define NS_ARP_TYPE_STR_LEN					8
 
-/* minimum # of octets in a Ethernet-II (802.3) frame (sans CRC) */
-#define NS_ETH_MIN_LEN								\
-	(												\
-		NS_ETH_HDR_LEN + 			/* ethernet hdr */	\
-		NS_ETH_MIN_PAYLOAD_LEN	/* min payload */	\
-	)
+/* IPv4 over Ethernet ARP payload */
+typedef struct _ns_arp_IPv4_eth_payload {
+		char ns_arp_sender_hw_addr[NS_ETH_IPv4_PRINTABLE_MAC_SIZE];
+		char ns_arp_sender_proto_addr[NS_ETH_IPv4_PRINTABLE_IPv4_SIZE];
+		char ns_arp_target_hw_addr[NS_ETH_IPv4_PRINTABLE_MAC_SIZE];
+		char ns_arp_target_proto_addr[NS_ETH_IPv4_PRINTABLE_IPv4_SIZE];
+} ns_arp_IPv4_eth_payload_t;
 
-/* maximum # of octets in a Ethernet-II (802.3) frame (sans CRC) */
-#define NS_ETH_MAX_LEN								\
-	(												\
-		NS_ETH_HDR_LEN + 			/* ethernet hdr */	\
-		NS_ETH_MAX_PAYLOAD_LEN	/* max payload */	\
-	)
+/* IPv4 over Ethernet ARP packet */
+typedef struct _ns_arp_IPv4_eth_packet {
+		ns_arp_packet_hdr_t ns_arp_hdr;
 
-/* print len */
-#define NS_ETH_TYPE_STR_LEN				6
+		/* addresses */
+		unsigned char ns_arp_sender_hw_addr[NS_ETH_ADDR_LEN];
+		unsigned char ns_arp_sender_proto_addr[NS_IPv4_ADDR_LEN];
+		unsigned char ns_arp_target_hw_addr[NS_ETH_ADDR_LEN];
+		unsigned char ns_arp_target_proto_addr[NS_IPv4_ADDR_LEN];
+} ns_arp_IPv4_eth_packet_t;
 
-ns_error_t parse_ethernet_packet(const unsigned char *, const int,
-        unsigned char**, uint16_t*);
-ns_error_t prepare_arp_spoof_response_buf_if_blacklisted(const unsigned char*,
-        unsigned char*, unsigned char*);
+ns_error_t parse_arp_packet(const unsigned char *);
+ns_error_t spoof_arp_response_if_blacklisted(const unsigned char*,
+        unsigned char*);
 
-#endif /* NS_ETHERNET_H_ */
+#endif /* NS_ARP_H_ */

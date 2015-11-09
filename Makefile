@@ -44,6 +44,7 @@ CC						?= gcc
 # project related CFLAGS
 CFLAGS 					= -Wall
 CFLAGS 					+= -Werror
+CFLAGS 					+= -g
 
 #
 # project related LDFLAGS

@@ -25,39 +25,32 @@
  */
 
 /*
- * ns_error.h
+ * ns_log.c
  *
- *  Created on		: 03-Nov-2015
+ *  Created on		: 08-Nov-2015
  *  Author		: rp
- *  Date			: 1:00:53 am
+ *  Date			: 12:50:51 pm
  */
 
-#ifndef NS_ERROR_H_
-#define NS_ERROR_H_
+#include <time.h>
+#include <stdio.h>
+#include <stdarg.h>
 
-typedef enum {
-	/* generic system failures */
-	ns_success,
-	ns_failure,
-	ns_malloc_failed,
+void log_print(char *file_name, unsigned int line_no, char *level, char *fmt,
+        ...)
+{
+	time_t cur_time = time(NULL);
+	struct tm *local_time = localtime(&cur_time);
+	va_list args;
 
-	/* generic network failures */
-	ns_socket_failed,
-	ns_recvfrom_received_no_data,
-	ns_unknown_host,
-	ns_ioctl_failed,
-	ns_interface_error,
-	ns_sendto_failed,
+	fprintf(stderr, "%4d-%02d-%02d %02d:%02d:%02d [%28s:%03d] : {%3s} ",
+	        (1900 + local_time->tm_year), local_time->tm_mon,
+	        local_time->tm_mday, local_time->tm_hour, local_time->tm_min,
+	        local_time->tm_sec, file_name, line_no, level);
 
-	/* ethernet */
-	ns_eth_empty_packet,
-	ns_eth_bad_packet_size,
-	ns_eth_broadcast,
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
 
-	/* arp */
-	ns_not_ethernet_arp_packet,
-	ns_not_ipv4_arp_packet,
-	ns_not_ipv4_arp_request_packet
-} ns_error_t;
-
-#endif /* NS_ERROR_H_ */
+	fprintf(stderr, "\n");
+}

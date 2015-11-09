@@ -25,39 +25,35 @@
  */
 
 /*
- * ns_error.h
+ * ns_utils.h
  *
- *  Created on		: 03-Nov-2015
+ *  Created on		: 06-Nov-2015
  *  Author		: rp
- *  Date			: 1:00:53 am
+ *  Date			: 7:48:19 pm
  */
 
-#ifndef NS_ERROR_H_
-#define NS_ERROR_H_
+#ifndef NS_UTILS_H_
+#define NS_UTILS_H_
 
-typedef enum {
-	/* generic system failures */
-	ns_success,
-	ns_failure,
-	ns_malloc_failed,
+#include <stdio.h>
+#include <arpa/inet.h>
 
-	/* generic network failures */
-	ns_socket_failed,
-	ns_recvfrom_received_no_data,
-	ns_unknown_host,
-	ns_ioctl_failed,
-	ns_interface_error,
-	ns_sendto_failed,
+#include "ns_error.h"
 
-	/* ethernet */
-	ns_eth_empty_packet,
-	ns_eth_bad_packet_size,
-	ns_eth_broadcast,
+#define MAC_ADDR_LEN						6
+#define IPv4_ADDR_LEN						4
 
-	/* arp */
-	ns_not_ethernet_arp_packet,
-	ns_not_ipv4_arp_packet,
-	ns_not_ipv4_arp_request_packet
-} ns_error_t;
+/* printable MAC address length */
+#define NS_ETH_IPv4_PRINTABLE_MAC_SIZE		24
+#define NS_ETH_IPv4_PRINTABLE_IPv4_SIZE		24
 
-#endif /* NS_ERROR_H_ */
+void human_readable_MAC(const unsigned char*, char*);
+void human_readable_IPv4(const unsigned char*, char*);
+
+ns_error_t get_ip_addr_from_name(const char*, struct in_addr*);
+ns_error_t get_MAC_from_device_name(const char* device_name,
+        unsigned char *mac);
+
+ns_error_t is_found(const unsigned char **, char *);
+
+#endif /* NS_UTILS_H_ */

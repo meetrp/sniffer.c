@@ -32,18 +32,29 @@
  *  Date			: 1:29:38 am
  */
 
-#include <stddef.h>
+#include <stddef.h>			/* NULL */
 
 #include "ns_log.h"
 #include "ns_error.h"
-#include "ns_ethernet.h"
+#include "ns_ethernet.h"		/* ethernet packet related fns */
+#include "ns_arp.h"			/* ARP packet related fns */
 
 void process_packet(const unsigned char *buf, const int buf_size)
 {
 	unsigned char *eth_payload = NULL;
+	uint16_t eth_payload_type;
 
-	if (ns_success != parse_ethernet_packet(buf, buf_size, &eth_payload)) {
-		ERR("Error while parsing ethernet packet!");
+	if (ns_success
+	        != parse_ethernet_packet(buf, buf_size, &eth_payload,
+	                &eth_payload_type)) {
+		ERR("Error while parsing ethernet packet!\n");
+		return;
+	}
+
+	//printf("about to check ARP: 0x%X\n", eth_payload_type);
+	if ((eth_payload_type == NS_ETH_TYPE_ARP)
+	        && (ns_success != parse_arp_packet(eth_payload))) {
+		ERR("Error while parsing ARP packet!\n");
 		return;
 	}
 }

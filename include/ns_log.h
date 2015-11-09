@@ -39,6 +39,9 @@
 
 // TODO: define a proper logger framework into a file
 
-#define ERR(...)		fprintf(stderr, __VA_ARGS__)
+void log_print(char *, unsigned int, char *, char *, ...);
+
+#define ERR(...)		log_print(__FILE__,__LINE__, "ERR", __VA_ARGS__)
+#define DBG(...)		log_print(__FILE__,__LINE__, "DBG", __VA_ARGS__)
 
 #endif /* NS_LOG_H_ */
