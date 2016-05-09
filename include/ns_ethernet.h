@@ -27,9 +27,9 @@
 /*
  * ns_ethernet.h
  *
- *  Created on		: 05-Nov-2015
- *  Author		: rp
- *  Date			: 11:00:19 pm
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 11:00:19 pm
  */
 
 #ifndef NS_ETHERNET_H_
@@ -39,6 +39,7 @@
 #include <stddef.h>		/* NULL */
 
 #include "ns_error.h"		/* error states */
+#include "ns_config.h"
 
 /************************************************************
  * ETHERNET FRAME FORMAT
@@ -53,26 +54,26 @@
 /*
  * Magic Constants as per the RFC
  */
-#define NS_ETH_ADDR_LEN				6		/* # of octets in MAC addr 	*/
-#define NS_ETH_TYPE_LEN				2		/* # of octets for type 		*/
-#define NS_ETH_MIN_PAYLOAD_LEN		46		/* min octects in a payload 	*/
-#define NS_ETH_MAX_PAYLOAD_LEN		1500	/* max octets in a payload 	*/
+#define NS_ETH_ADDR_LEN						6				/* # of octets in MAC addr 	*/
+#define NS_ETH_TYPE_LEN						2				/* # of octets for type 		*/
+#define NS_ETH_MIN_PAYLOAD_LEN		28			/* min octects in a payload 	*/
+#define NS_ETH_MAX_PAYLOAD_LEN		1504		/* max octets in a payload 	*/
 
 /*
  * Protocol ID
  */
-#define NS_ETH_TYPE_IPv4				0x0800	/* IPv4 */
-#define NS_ETH_TYPE_ARP				0x0806	/* Address Resolution packet	*/
-#define NS_ETH_TYPE_IPv6				0x86DD	/* IPv6 */
+#define NS_ETH_TYPE_IPv4						0x0800		/* IPv4 */
+#define NS_ETH_TYPE_ARP						0x0806		/* Address Resolution packet	*/
+#define NS_ETH_TYPE_IPv6						0x86DD		/* IPv6 */
 
 /*
  * Ethernet-II (802.3) header
  */
-#define NS_ETH_HDR_LEN								\
-	(												\
-		NS_ETH_ADDR_LEN +	/* Dest MAC */			\
-		NS_ETH_ADDR_LEN +	/* Src MAC */				\
-		NS_ETH_TYPE_LEN	/* Ether Type */			\
+#define NS_ETH_HDR_LEN																							\
+	(																																	\
+		NS_ETH_ADDR_LEN +	/* Dest MAC */																\
+		NS_ETH_ADDR_LEN +	/* Src MAC */																	\
+		NS_ETH_TYPE_LEN		/* Ether Type */																\
 	)
 
 typedef struct _ns_ethernet_frame_hdr {
@@ -81,26 +82,30 @@ typedef struct _ns_ethernet_frame_hdr {
 		uint16_t ns_eth_type;
 } ns_ethernet_frame_hdr_t;
 
-/* minimum # of octets in a Ethernet-II (802.3) frame (sans CRC) */
-#define NS_ETH_MIN_LEN								\
-	(												\
-		NS_ETH_HDR_LEN + 			/* ethernet hdr */	\
-		NS_ETH_MIN_PAYLOAD_LEN	/* min payload */	\
+/*
+ * minimum # of octets in a Ethernet-II (802.3) frame (sans CRC)
+ */
+#define NS_ETH_MIN_LEN																							\
+	(																																	\
+		NS_ETH_HDR_LEN + 				/* ethernet hdr */												\
+		NS_ETH_MIN_PAYLOAD_LEN	/* min payload */												\
 	)
 
-/* maximum # of octets in a Ethernet-II (802.3) frame (sans CRC) */
-#define NS_ETH_MAX_LEN								\
-	(												\
-		NS_ETH_HDR_LEN + 			/* ethernet hdr */	\
-		NS_ETH_MAX_PAYLOAD_LEN	/* max payload */	\
+/*
+ * maximum # of octets in a Ethernet-II (802.3) frame (sans CRC)
+ */
+#define NS_ETH_MAX_LEN																							\
+	(																																	\
+		NS_ETH_HDR_LEN + 				/* ethernet hdr */												\
+		NS_ETH_MAX_PAYLOAD_LEN	/* max payload */												\
 	)
 
-/* print len */
-#define NS_ETH_TYPE_STR_LEN				6
+/*
+ * print len
+ */
+#define NS_ETH_TYPE_STR_LEN					6
 
-ns_error_t parse_ethernet_packet(const unsigned char *, const int,
-        unsigned char**, uint16_t*);
-ns_error_t prepare_arp_spoof_response_buf_if_blacklisted(const unsigned char*,
-        unsigned char*, unsigned char*);
+PUBLIC ns_error_t parse_ethernet_packet(IN unsigned char *, IN int,
+	OUT unsigned char**, OUT uint16_t*);
 
 #endif /* NS_ETHERNET_H_ */

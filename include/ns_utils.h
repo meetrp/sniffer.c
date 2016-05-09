@@ -27,9 +27,9 @@
 /*
  * ns_utils.h
  *
- *  Created on		: 06-Nov-2015
- *  Author		: rp
- *  Date			: 7:48:19 pm
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 7:48:19 pm
  */
 
 #ifndef NS_UTILS_H_
@@ -39,20 +39,21 @@
 #include <arpa/inet.h>
 
 #include "ns_error.h"
+#include "ns_config.h"
 
-#define MAC_ADDR_LEN						6
-#define IPv4_ADDR_LEN						4
+#define MAC_ADDR_LEN											6
+#define IPv4_ADDR_LEN											4
 
 /* printable MAC address length */
 #define NS_ETH_IPv4_PRINTABLE_MAC_SIZE		24
 #define NS_ETH_IPv4_PRINTABLE_IPv4_SIZE		24
 
-void human_readable_MAC(const unsigned char*, char*);
-void human_readable_IPv4(const unsigned char*, char*);
+PUBLIC void human_readable_MAC(IN unsigned char*, OUT char*);
+PUBLIC void human_readable_IPv4(IN unsigned char*, OUT char*);
 
-ns_error_t get_ip_addr_from_name(const char*, struct in_addr*);
-ns_error_t get_MAC_from_device_name(const char*, unsigned char*);
+PUBLIC char* human_readable_IPV4_from_number(IN uint32_t ip, char* ip_str);
 
-ns_error_t is_found(const unsigned char **, char *);
+PUBLIC ns_error_t get_ip_addr_from_name(IN char*, OUT struct in_addr*);
+PUBLIC ns_error_t get_MAC_from_device_name(IN char*, OUT unsigned char*);
 
 #endif /* NS_UTILS_H_ */

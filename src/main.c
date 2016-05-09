@@ -27,9 +27,9 @@
 /*
  * main.c
  *
- *  Created on      : 03-Nov-2015
- *  Author          : rp
- *  Date            : 12:43:48 am
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 12:43:48 am
  */
 
 #include "ns_config.h"
@@ -37,5 +37,5 @@
 
 int main(int argc, char *argv[])
 {
-    return sniffer();
+	return sniffer();
 }

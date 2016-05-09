@@ -27,9 +27,9 @@
 /*
  * ns_sniffer.h
  *
- *  Created on      : 03-Nov-2015
- *  Author          : rp
- *  Date            : 12:48:52 am
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 12:48:52 am
  */
 
 #ifndef NS_SNIFFER_H_

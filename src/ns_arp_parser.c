@@ -27,9 +27,9 @@
 /*
  * ns_arp_parser.c
  *
- *  Created on		: 06-Nov-2015
- *  Author		: rp
- *  Date			: 12:57:22 am
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 12:57:22 am
  */
 
 #include <string.h>
@@ -41,108 +41,36 @@
 #include "ns_utils.h"
 #include "ns_config.h"
 
-static unsigned char blacklist[][NS_ETH_IPv4_PRINTABLE_MAC_SIZE] =
-{
-        "08:00:27:6E:C9:AA"
-};
-
-static void convert_arp_type(const uint16_t opcode, char *arp_type)
+PRIVATE void convert_arp_type(IN uint16_t opcode, OUT char *arp_type)
 {
 	switch (opcode) {
 		case NS_ARP_REQUEST:
-			snprintf((char *) arp_type, NS_ARP_TYPE_STR_LEN,
-			        "Reqst");
-			break;
+		snprintf((char *) arp_type, NS_ARP_TYPE_STR_LEN, "Reqst");
+		break;
 		case NS_ARP_REPLY:
-			snprintf((char *) arp_type, NS_ARP_TYPE_STR_LEN,
-			        "Reply");
-			break;
+		snprintf((char *) arp_type, NS_ARP_TYPE_STR_LEN, "Reply");
+		break;
 	}
 }
 
-static void convert_arp_payload_to_human_readable(
-        const ns_arp_IPv4_eth_packet_t *arp_IPv4_payload,
-        ns_arp_IPv4_eth_payload_t *arp_IPv4_human_readable)
-{
-	human_readable_MAC(arp_IPv4_payload->ns_arp_sender_hw_addr,
-	        arp_IPv4_human_readable->ns_arp_sender_hw_addr);
-	human_readable_IPv4(arp_IPv4_payload->ns_arp_sender_proto_addr,
-	        arp_IPv4_human_readable->ns_arp_sender_proto_addr);
-
-	human_readable_MAC(arp_IPv4_payload->ns_arp_target_hw_addr,
-	        arp_IPv4_human_readable->ns_arp_target_hw_addr);
-	human_readable_IPv4(arp_IPv4_payload->ns_arp_target_proto_addr,
-	        arp_IPv4_human_readable->ns_arp_target_proto_addr);
-}
-
-static void dump_ipv4_eth_arp_packet(const ns_arp_IPv4_eth_packet_t *arp_IPv4)
+PRIVATE void dump_ipv4_eth_arp_packet(IN ns_arp_IPv4_eth_packet_t *arp_IPv4)
 {
 	char arp_type[NS_ARP_TYPE_STR_LEN];
-	ns_arp_IPv4_eth_payload_t arp_IPv4_human_readable;
+	char src_mac[NS_ETH_IPv4_PRINTABLE_MAC_SIZE];
+	char src_ip[NS_ETH_IPv4_PRINTABLE_IPv4_SIZE];
+	char dest_mac[NS_ETH_IPv4_PRINTABLE_MAC_SIZE];
+	char dest_ip[NS_ETH_IPv4_PRINTABLE_IPv4_SIZE];
 
 	convert_arp_type(ntohs(arp_IPv4->ns_arp_hdr.ns_arp_opcode), arp_type);
-	convert_arp_payload_to_human_readable(arp_IPv4,
-	        &arp_IPv4_human_readable);
-	DBG("ARP: %s [%s (%s)] --> [%s (%s)]", arp_type,
-	        arp_IPv4_human_readable.ns_arp_sender_hw_addr,
-	        arp_IPv4_human_readable.ns_arp_sender_proto_addr,
-	        arp_IPv4_human_readable.ns_arp_target_hw_addr,
-	        arp_IPv4_human_readable.ns_arp_target_proto_addr);
+	human_readable_MAC(arp_IPv4->ns_arp_sender_hw_addr, src_mac);
+	human_readable_MAC(arp_IPv4->ns_arp_target_hw_addr, dest_mac);
+	human_readable_IPv4(arp_IPv4->ns_arp_sender_proto_addr, src_ip);
+	human_readable_IPv4(arp_IPv4->ns_arp_target_proto_addr, dest_ip);
+
+	DBG("[%4s] (%5s) %s --> %s", "ARP", arp_type, src_ip, dest_ip);
 }
 
-static void modify_packet_to_ARP_reply(const unsigned char* local_mac,
-        ns_arp_IPv4_eth_packet_t* arp_IPv4)
-{
-	unsigned char temp_ip[NS_IPv4_ADDR_LEN];
-
-	DBG("--------------------------------------------------");
-	dump_ipv4_eth_arp_packet(arp_IPv4);
-
-	/* swap the entries except for sender mac */
-	memcpy(arp_IPv4->ns_arp_target_hw_addr, arp_IPv4->ns_arp_sender_hw_addr,
-	        NS_ETH_ADDR_LEN);
-	memcpy(arp_IPv4->ns_arp_sender_hw_addr, local_mac, NS_ETH_ADDR_LEN);
-
-	memcpy(temp_ip, arp_IPv4->ns_arp_sender_proto_addr, NS_IPv4_ADDR_LEN);
-	memcpy(arp_IPv4->ns_arp_sender_proto_addr,
-	        arp_IPv4->ns_arp_target_proto_addr, NS_IPv4_ADDR_LEN);
-	memcpy(arp_IPv4->ns_arp_target_proto_addr, temp_ip, NS_IPv4_ADDR_LEN);
-
-	arp_IPv4->ns_arp_hdr.ns_arp_opcode = ntohs(NS_ARP_REPLY);
-
-	DBG("--------------------------------------------------");
-	dump_ipv4_eth_arp_packet(arp_IPv4);
-	DBG("--------------------------------------------------");
-}
-
-ns_error_t spoof_arp_response_if_blacklisted(const unsigned char* local_mac,
-        unsigned char* buf)
-{
-	ns_arp_IPv4_eth_payload_t arp_IPv4_human_readable;
-	ns_arp_IPv4_eth_packet_t* arp_IPv4 = (ns_arp_IPv4_eth_packet_t *) buf;
-	ns_error_t response = ns_success;
-
-	if (ntohs(arp_IPv4->ns_arp_hdr.ns_arp_opcode) != NS_ARP_REQUEST) {
-		return ns_not_ipv4_arp_request_packet;
-	}
-
-	convert_arp_payload_to_human_readable(arp_IPv4,
-	        &arp_IPv4_human_readable);
-
-	response = is_found((const unsigned char**) blacklist,
-	        arp_IPv4_human_readable.ns_arp_target_hw_addr);
-	if (ns_success != response) {
-		ERR("Not found in blacklist: %d!", response);
-		return response;
-	}
-
-	DBG("about to modify");
-	modify_packet_to_ARP_reply(local_mac, arp_IPv4);
-
-	return response;
-}
-
-ns_error_t parse_arp_packet(const unsigned char *packet)
+PUBLIC ns_error_t parse_arp_packet(IN unsigned char *packet)
 {
 	ns_arp_IPv4_eth_packet_t *arp_IPv4 = NULL;
 	ns_arp_packet_hdr_t *arp_hdr = (ns_arp_packet_hdr_t *) packet;
