@@ -27,38 +27,47 @@
 /*
  * ns_utils.c
  *
- *  Created on		: 06-Nov-2015
- *  Author		: rp
- *  Date			: 7:50:15 pm
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 7:50:15 pm
  */
 
-#include <string.h>
+#include <string.h>					/* bzero */
 #include <netdb.h>
 #include <sys/ioctl.h>			/* SIOCGIFHWADDR */
-#include <net/if.h>				/* ifr */
-#include <unistd.h>			/* close */
+#include <net/if.h>					/* ifr */
+#include <unistd.h>				/* close */
 
 #include "ns_utils.h"
 #include "ns_ethernet.h"
 #include "ns_log.h"
 
-void human_readable_MAC(const unsigned char* orig_mac, char* mac)
+PUBLIC void human_readable_MAC(IN unsigned char* orig_mac, OUT char* mac)
 {
 	bzero(mac, NS_ETH_IPv4_PRINTABLE_MAC_SIZE);
 	snprintf(mac, NS_ETH_IPv4_PRINTABLE_MAC_SIZE,
-	        "%.2X-%.2X-%.2X-%.2X-%.2X-%.2X", orig_mac[0], orig_mac[1],
-	        orig_mac[2], orig_mac[3], orig_mac[4], orig_mac[5]);
+		"%.2X-%.2X-%.2X-%.2X-%.2X-%.2X", orig_mac[0], orig_mac[1], orig_mac[2],
+		orig_mac[3], orig_mac[4], orig_mac[5]);
 }
 
-void human_readable_IPv4(const unsigned char* orig_ip, char* ip)
+PUBLIC void human_readable_IPv4(IN unsigned char* orig_ip, OUT char* ip)
 {
 	bzero(ip, NS_ETH_IPv4_PRINTABLE_IPv4_SIZE);
 	snprintf(ip, NS_ETH_IPv4_PRINTABLE_IPv4_SIZE, "%d.%d.%d.%d", orig_ip[0],
-	        orig_ip[1], orig_ip[2], orig_ip[3]);
+		orig_ip[1], orig_ip[2], orig_ip[3]);
 }
 
-ns_error_t get_ip_addr_from_name(const char* device_name,
-        struct in_addr* in_addr)
+PUBLIC char* human_readable_IPV4_from_number(IN uint32_t ip, char* ip_str)
+{
+	struct in_addr addr;
+	addr.s_addr = ip;
+
+	inet_ntop(AF_INET, &addr, ip_str, INET_ADDRSTRLEN);
+	return ip_str;
+}
+
+PUBLIC ns_error_t get_ip_addr_from_name(IN char* device_name,
+	OUT struct in_addr* in_addr)
 {
 	int fd;
 	struct ifreq ifr;
@@ -79,7 +88,7 @@ ns_error_t get_ip_addr_from_name(const char* device_name,
 	return ns_success;
 }
 
-ns_error_t get_MAC_from_device_name(const char* device_name, unsigned char *mac)
+PUBLIC ns_error_t get_MAC_from_device_name(IN char* device_name, OUT unsigned char *mac)
 {
 	struct ifreq interface_request;
 	int sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
@@ -93,15 +102,9 @@ ns_error_t get_MAC_from_device_name(const char* device_name, unsigned char *mac)
 	if (0 == ioctl(sock, SIOCGIFHWADDR, &interface_request)) {
 		int i;
 		for (i = 0; i < NS_ETH_ADDR_LEN; ++i)
-			mac[i] = (unsigned char) interface_request.ifr_addr.sa_data[i];
+		mac[i] = (unsigned char) interface_request.ifr_addr.sa_data[i];
 		return ns_success;
 	}
 
 	return ns_ioctl_failed;
-}
-
-ns_error_t is_found(const unsigned char **list, char *mac)
-{
-	/* TODO: implement string search in an array */
-	return ns_success;
 }

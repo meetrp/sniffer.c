@@ -26,39 +26,39 @@
 
 #
 # Primary outputs
-BIN                     = sniffer
+BIN										= sniffer
 
 #
 # default directories
-INCLUDE_DIR             = include
-BUILD_DIR               = build
-SRC_DIR                 = src
+INCLUDE_DIR						= include
+BUILD_DIR							= build
+SRC_DIR								= src
 
-DEFAULT_LIB_PATH        ?= /usr/local/lib
+DEFAULT_LIB_PATH			?= /usr/local/lib
 
 #
 # commonly used tools
-CC                      ?= gcc
+CC										?= gcc
 
 #
 # project related CFLAGS
-CFLAGS                  = -Wall
-CFLAGS                  += -Werror
-CFLAGS                  += -g
+CFLAGS								= -Wall
+CFLAGS								+= -Werror
+CFLAGS								+= -g
+CFLAGS								+= -D_GNU_SOURCE
 
 #
 # project related LDFLAGS
-LDFLAGS                 = -L $(DEFAULT_LIB_PATH)
+LDFLAGS							= -L $(DEFAULT_LIB_PATH)
 
 #
 # project related IFLAGS
-IFLAGS                  = -I $(INCLUDE_DIR)
-
+IFLAGS								= -I $(INCLUDE_DIR)
 
 
 #
 # By default do not install
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL 				:= all
 
 all: bin
 
@@ -76,17 +76,17 @@ bin: $(addprefix $(BUILD_DIR)/, $(BIN))
 # Define the project files
 #   1. Get all the .c files in the given 'src' folder.
 #   2. For every src/.c, the object file is build/src/.o
-SRC_OBJ_DIR = $(addprefix $(BUILD_DIR)/,                        \
-                $(SRC_DIR)                                      \
-            )
-SRC_FILES   = $(foreach sdir,                                   \
-                $(SRC_DIR),                                     \
-                $(wildcard $(sdir)/*.c)                         \
-            )
-SRC_OBJS    = $(patsubst $(SRC_DIR)/%.c,                        \
-                $(SRC_OBJ_DIR)/%.o,                             \
-                $(SRC_FILES)                                    \
-            )
+SRC_OBJ_DIR = $(addprefix $(BUILD_DIR)/,																\
+								$(SRC_DIR)																						\
+							)
+SRC_FILES   = $(foreach sdir,																						\
+							$(SRC_DIR),																						\
+							$(wildcard $(sdir)/*.c)																		\
+						)
+SRC_OBJS    = $(patsubst $(SRC_DIR)/%.c,																	\
+								$(SRC_OBJ_DIR)/%.o,																		\
+								$(SRC_FILES)																					\
+						)
 
 #
 # build the main binary

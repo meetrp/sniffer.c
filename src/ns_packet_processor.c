@@ -27,34 +27,47 @@
 /*
  * ns_packet_processor.c
  *
- *  Created on		: 03-Nov-2015
- *  Author		: rp
- *  Date			: 1:29:38 am
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 1:29:38 am
  */
 
-#include <stddef.h>			/* NULL */
+#include <stddef.h>				/* NULL */
 
 #include "ns_log.h"
 #include "ns_error.h"
 #include "ns_ethernet.h"		/* ethernet packet related fns */
-#include "ns_arp.h"			/* ARP packet related fns */
+#include "ns_arp.h"				/* ARP packet related fns */
+#include "ns_ipv4.h"				/* IPv4 related fns */
 
-void process_packet(const unsigned char *buf, const int buf_size)
+void process_packet(IN unsigned char *buf, IN int buf_size)
 {
 	unsigned char *eth_payload = NULL;
 	uint16_t eth_payload_type;
 
 	if (ns_success
-	        != parse_ethernet_packet(buf, buf_size, &eth_payload,
-	                &eth_payload_type)) {
+		!= parse_ethernet_packet(buf, buf_size, &eth_payload,
+			&eth_payload_type)) {
 		ERR("Error while parsing ethernet packet!\n");
 		return;
 	}
 
-	//printf("about to check ARP: 0x%X\n", eth_payload_type);
-	if ((eth_payload_type == NS_ETH_TYPE_ARP)
-	        && (ns_success != parse_arp_packet(eth_payload))) {
-		ERR("Error while parsing ARP packet!\n");
-		return;
+	//DBG("0x%x", eth_payload_type);
+
+	switch (eth_payload_type) {
+		case NS_ETH_TYPE_ARP:
+		if (ns_success != parse_arp_packet(eth_payload)) {
+			ERR("Error while parsing ARP packet!\n");
+		}
+		break;
+
+		case NS_ETH_TYPE_IPv4:
+		if (ns_success != parse_ipv4_packet(eth_payload)) {
+			ERR("Error while parsing ARP packet!\n");
+		}
+		break;
+
+		default:
+		DBG("0x%x\n", eth_payload_type);
 	}
 }

@@ -27,16 +27,15 @@
 /*
  * ns_arp_packet.h
  *
- *  Created on      : 12-Nov-2015
- *  Author          : rp
- *  Date            : 10:50:46 pm
+ *  Created on			: 03-Nov-2015
+ *  Author				: rp
+ *  Date					: 10:50:46 pm
  */
 
 #ifndef NS_ARP_PACKET_H_
 #define NS_ARP_PACKET_H_
 
-#include <stdint.h>         /* uint16_t and likes */
-
+#include <stdint.h>						/* uint16_t and likes */
 
 /************************************************************
  * ARP FRAME HDR FORMAT
@@ -51,26 +50,26 @@
 /*
  * Magic Constants as per the RFC
  */
-#define NS_ARP_ETHERNET_TYPE                1       /* Ethernet 10/100Mbps */
+#define NS_ARP_ETHERNET_TYPE					1				/* Ethernet 10/100Mbps */
 
 /*
  * ARP protocol opcodes
  */
-#define NS_ARP_REQUEST                      1       /* ARP request. */
-#define NS_ARP_REPLY                        2       /* ARP reply. */
+#define NS_ARP_REQUEST								1				/* ARP request. */
+#define NS_ARP_REPLY									2 				/* ARP reply. */
 
 typedef struct _ns_arp_packet_hdr {
-        uint16_t    ns_arp_hw_type;
-        uint16_t    ns_arp_proto_type;
-        uint8_t     ns_arp_hw_addr_len;
-        uint8_t     ns_arp_proto_addr_len;
-        uint16_t    ns_arp_opcode;
+		uint16_t ns_arp_hw_type;
+		uint16_t ns_arp_proto_type;
+		uint8_t ns_arp_hw_addr_len;
+		uint8_t ns_arp_proto_addr_len;
+		uint16_t ns_arp_opcode;
 } ns_arp_packet_hdr_t;
 
 /* ToDo: Move to IPv4 based file */
-#define NS_IPv4_ADDR_LEN                    4       /* Length of IPv4 addr */
-#define NS_ARP_TYPE_STR_LEN                 8
+#define NS_IPv4_ADDR_LEN						4			/* Length of IPv4 addr */
+#define NS_ARP_TYPE_STR_LEN					8
 
-#define NS_ARP_REPLY_BUF_LEN                42      /* Size of ARP reply */
+#define NS_ARP_REPLY_BUF_LEN				42		/* Size of ARP reply */
 
 #endif /* NS_ARP_PACKET_H_ */
